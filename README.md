@@ -8,7 +8,9 @@ Usage
 
 To use the provider just copy the folder containing the source (SimpleTelemetryProvider) into the UnreadBuildTool in your visual Studio Solution. For Linux and Mac add the folder into the required project files.
 
-Once you have the folder setup you only have to change the URL and the method name (depending on your WebServer)
+To debug the provider set the ```ue.UBT.bDebugRPCCalls``` environment variable to true, you will see the requests and responses to get printed to your build log.
+
+Once you have the folder setup you only have to change the URL and the method name (depending on your WebServer):
 
 ```C#
 class SimpleTelemetryProvider : Telemetry.IProvider
