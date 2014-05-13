@@ -62,7 +62,7 @@ namespace SimpleTelemetry
         /// <param name="id"></param>
         /// <param name="method"></param>
         /// <param name="methodParams"></param>
-        public JSONRequest(int id, string method, string eventName=null, string commandLine=null, IEnumerable<Tuple<string, string>> parameters=null)
+        public JSONRequest(int id, string method, string SessionID = null, string eventName=null, string commandLine=null, IEnumerable<Tuple<string, string>> parameters=null)
         {
             this.id = id;
             this.method = method;
@@ -76,6 +76,10 @@ namespace SimpleTelemetry
                 if (commandLine != null)
                 {
                     header.Add("cmd", commandLine);
+                }
+                if (SessionID != null)
+                {
+                    header.Add("sessionid", SessionID);
                 }
                 this.parameters.Add(header);
             }

@@ -135,9 +135,9 @@ namespace SimpleTelemetry
         /// <param name="method"></param>
         /// <param name="methodParams"></param>
         /// <returns></returns>
-        public JSONRequest CreateRequest(string method, string eventName=null, string commandLine=null, IEnumerable<Tuple<string, string>> parameters=null)
+        public JSONRequest CreateRequest(string method, string SessionID = null, string eventName = null, string commandLine = null, IEnumerable<Tuple<string, string>> parameters = null)
         {
-            return new JSONRequest(Interlocked.Increment(ref currentId), method, eventName, commandLine, parameters);
+            return new JSONRequest(Interlocked.Increment(ref currentId), method, SessionID, eventName, commandLine, parameters);
         }
 
         /// <summary>

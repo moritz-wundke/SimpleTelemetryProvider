@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web.Script.Serialization;
 using UnrealBuildTool;
 
 namespace SimpleTelemetry
@@ -46,6 +47,12 @@ namespace SimpleTelemetry
         public List<JSONRequest> requests = new List<JSONRequest>();
 
         private string CommandLine = null;
+        private string SessionID = null;
+
+        public class SessionResponse
+        {
+            public string result { get; set; }
+        }
 
         public SimpleTelemetryProvider()
         {
@@ -53,12 +60,14 @@ namespace SimpleTelemetry
             {
                 proxy = new JSONClient(HostUrl);
                 // Ping the server if it faild null the provider
-                proxy.Exec(proxy.CreateRequest("ping"));
+                var response = proxy.Exec(proxy.CreateRequest("request_id"));
+                SessionID = (new JavaScriptSerializer()).Deserialize<SessionResponse>(response).result;
             }
             catch (Exception Exception)
             {
                 Log.TraceError("SimpleTelemetryProvider Exception: " + Exception);
                 proxy = null;
+                SessionID = null;
             }
             
         }
@@ -82,7 +91,7 @@ namespace SimpleTelemetry
                         }
                     }
                 }
-                requests.Add(proxy.CreateRequest(MethodName, EventName, CommandLine, Attributes));
+                requests.Add(proxy.CreateRequest(MethodName, SessionID, EventName, CommandLine, Attributes));
             }
         }
 

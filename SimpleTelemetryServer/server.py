@@ -25,6 +25,7 @@ import web
 import ubt.view
 import ubt.config
 import ubt.db
+import uuid
 from ubt.view import render
 
 # JSON RPC server taken from : https://github.com/moritz-wundke/simplejsonrpc
@@ -49,6 +50,10 @@ class json_handler:
 @jsonremote(api_service, doc='print api documentation')
 def api(request):
     return api_service.api()
+
+@jsonremote(api_service, doc='Generate uuid to be used to group events together')
+def request_id(request):
+    return str(uuid.uuid1())
     
 @jsonremote(api_service, doc='ping server')
 def ping(request):
