@@ -75,7 +75,9 @@ namespace SimpleTelemetry
                     {
                         if (String.Compare("CommandLine", item.Item1) == 0)
                         {
-                            CommandLine = item.Item2.Split(' ')[0];
+                            CommandLine = item.Item2;
+                            // We better do not split, this way we get builds, rebuilds, etc
+                            //CommandLine = item.Item2.Split(' ')[0];
                             break;
                         }
                     }
