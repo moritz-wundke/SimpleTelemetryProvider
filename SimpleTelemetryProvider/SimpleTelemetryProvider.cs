@@ -37,17 +37,28 @@ namespace SimpleTelemetry
     class SimpleTelemetryProvider : Telemetry.IProvider
     {
         private JSONClient proxy;
-        private string HostUrl = "<your/host/url/>";
+        private string HostUrl = "http://<you/host/>:8080/api";
         private static string MethodName = "UBT";
+
+        /// <summary>
+        /// List of requests we will send at the end
+        /// </summary>
+        public List<JSONRequest> requests = new List<JSONRequest>();
+
+        private string CommandLine = null;
+
         public SimpleTelemetryProvider()
         {
             try 
             {
                 proxy = new JSONClient(HostUrl);
+                // Ping the server if it faild null the provider
+                proxy.Exec(proxy.CreateRequest("ping"));
             }
             catch (Exception Exception)
             {
-                Log.TraceError("UnrealBuildTool Exception: " + Exception);
+                Log.TraceError("SimpleTelemetryProvider Exception: " + Exception);
+                proxy = null;
             }
             
         }
@@ -56,7 +67,20 @@ namespace SimpleTelemetry
         {
             if (proxy != null)
             {
-                proxy.ExecAsync(proxy.CreateRequest(MethodName, Attributes));
+                // Search for the cmd atribute we use in the header
+                
+                if (CommandLine == null && Attributes != null && EventName.Contains("CommonAttributes"))
+                {
+                    foreach (var item in Attributes)
+                    {
+                        if (String.Compare("CommandLine", item.Item1) == 0)
+                        {
+                            CommandLine = item.Item2.Split(' ')[0];
+                            break;
+                        }
+                    }
+                }
+                requests.Add(proxy.CreateRequest(MethodName, EventName, CommandLine, Attributes));
             }
         }
 
@@ -64,6 +88,13 @@ namespace SimpleTelemetry
         {
             if (proxy != null)
             {
+                // Submit all events
+                foreach (JSONRequest request in requests)
+                {
+                    proxy.Exec(request);
+                }
+
+                // Dispose proxy
                 proxy.Dispose();
             }
         }

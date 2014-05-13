@@ -1,0 +1,11 @@
+$def with (item)
+
+<b>$item['cmd']</b>
+<ul>
+    <li>$item['event']:
+        <ul>
+            $for event in item['data']:
+            <li>$event: $item['data'][event]</li>
+        </ul>
+    </li>
+</ul>

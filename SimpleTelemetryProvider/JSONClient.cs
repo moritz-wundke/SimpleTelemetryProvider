@@ -52,6 +52,11 @@ namespace SimpleTelemetry
         private readonly WebClient webClient;
 
         /// <summary>
+        /// Print RPC debug information into the log
+        /// </summary>
+        public static bool bDebugRPCCalls; 
+
+        /// <summary>
         /// Headers used for every request
         /// </summary>
         public WebHeaderCollection Headers { get { return this.webClient.Headers; } }
@@ -70,6 +75,7 @@ namespace SimpleTelemetry
         
         public JSONClient(string url)
         {
+            bDebugRPCCalls = Utils.GetEnvironmentVariable("ue.UBT.bDebugRPCCalls", true);
             this.uri = new Uri(url);
             this.webClient = new WebClient();
             this.webClient.Headers.Add("Content-Type", "application/json");
@@ -86,15 +92,20 @@ namespace SimpleTelemetry
             try
             {
                 string requestSerialized = request.ToJSON();
+                Log.WriteLineIf(bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, requestSerialized);
                 byte[] requestBinary = Encoding.UTF8.GetBytes(requestSerialized);
                 byte[] resultBinary;
                 lock (this.webClient)
                 {
                     resultBinary = this.webClient.UploadData(this.uri, "POST", requestBinary);
                 }
-                return Encoding.UTF8.GetString(resultBinary);
-            } catch (Exception) {
-                //Log.WriteLine(System.Diagnostics.TraceEventType.Error, e.ToString());
+                string responseSerialized = Encoding.UTF8.GetString(resultBinary);
+                Log.WriteLineIf(bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, responseSerialized);
+                return responseSerialized;
+            }
+            catch (Exception Exception)
+            {
+                Log.TraceError("JSONClient Exception: " + Exception);
             }
             return "";
         }
@@ -103,14 +114,17 @@ namespace SimpleTelemetry
         {
             try {
                 string requestSerialized = request.ToJSON();
+                Log.WriteLineIf(bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, requestSerialized);
                 byte[] requestBinary = Encoding.UTF8.GetBytes(requestSerialized);
                 lock (webClient)
                 {
                     this.webClient.UploadDataAsync(this.uri, "POST", requestBinary, request.id);
                 }
                 return request.id;
-            } catch (Exception) {
-                //Log.WriteLine(System.Diagnostics.TraceEventType.Error, e.ToString());
+            }
+            catch (Exception Exception)
+            {
+                Log.TraceError("JSONClient Exception: " + Exception);
             }
             return -1;
         }
@@ -121,13 +135,13 @@ namespace SimpleTelemetry
         /// <param name="method"></param>
         /// <param name="methodParams"></param>
         /// <returns></returns>
-        public JSONRequest CreateRequest(string method, IEnumerable<Tuple<string, string>> parameters)
+        public JSONRequest CreateRequest(string method, string eventName=null, string commandLine=null, IEnumerable<Tuple<string, string>> parameters=null)
         {
-            return new JSONRequest(Interlocked.Increment(ref currentId), method, parameters);
+            return new JSONRequest(Interlocked.Increment(ref currentId), method, eventName, commandLine, parameters);
         }
 
         /// <summary>
-        /// Called when a async web call has been completed
+        /// Called when a async web call has been completed (NOT USED)
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="uploadDataCompletedEventArgs"></param>
@@ -138,14 +152,15 @@ namespace SimpleTelemetry
                 int id = (int)uploadDataCompletedEventArgs.UserState;
                 byte[] responseBinary = uploadDataCompletedEventArgs.Result;
                 string responseSerialized = Encoding.UTF8.GetString(responseBinary);
+                Log.WriteLineIf(bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, responseSerialized);
 
                 // fire event.
                 if (AsyncCompleted != null)
                     AsyncCompleted(id, responseSerialized); // TODO: Add response
             }
-            catch (Exception)
+            catch (Exception Exception)
             {
-                //Log.WriteLine(System.Diagnostics.TraceEventType.Error, e.ToString());
+                Log.TraceError("JSONClient Exception: " + Exception);
             }
         }
 

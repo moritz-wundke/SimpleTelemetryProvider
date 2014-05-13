@@ -61,19 +61,34 @@ namespace SimpleTelemetry
         /// <param name="id"></param>
         /// <param name="method"></param>
         /// <param name="methodParams"></param>
-        public JSONRequest(int id, string method, IEnumerable<Tuple<string, string>> parameters)
+        public JSONRequest(int id, string method, string eventName=null, string commandLine=null, IEnumerable<Tuple<string, string>> parameters=null)
         {
             this.id = id;
             this.method = method;
             this.parameters = new List<Dictionary<string,string>>();
-            
-            Dictionary<string, string> local_params = new Dictionary<string,string>();
-            foreach (var item in parameters)
+
+            // event header
+            if (eventName != null)
             {
-                local_params.Add(item.Item1, item.Item2);
+                Dictionary<string, string> header = new Dictionary<string, string>();
+                header.Add("event", eventName);
+                if (commandLine != null)
+                {
+                    header.Add("cmd", commandLine);
+                }
+                this.parameters.Add(header);
             }
 
-            this.parameters.Add(local_params);
+            // event params
+            if (parameters != null)
+            {
+                Dictionary<string, string> local_params = new Dictionary<string, string>();
+                foreach (var item in parameters)
+                {
+                    local_params.Add(item.Item1, item.Item2);
+                }
+                this.parameters.Add(local_params);
+            }
         }
 
         public string ToJSON()

@@ -15,12 +15,23 @@ class SimpleTelemetryProvider : Telemetry.IProvider
 {
     [...]
     
-    private string HostUrl = "<your/host/url/>";
+    private string HostUrl = "http://<you/host/>:8080/api";
     private static string MethodName = "UBT";
     
     [...]
 }
 ```
+
+A simple JSON RPC 2.0 python server has been provided to be able to start getting your stats up and running as fast as possible. Just use the ```run.[bat|sh]``` to launch the server. The server will run by default on port 8080, check the launch script to specifiy a different port. 
+
+The server requires a set of prerequisite:
+* Python 2.7
+* Web.Py
+* Setuptools
+* PyMongo
+
+To configure your mongo db connection just change the connection URL which can be found in ```ubt.config.py```
+
 
 License
 ----
