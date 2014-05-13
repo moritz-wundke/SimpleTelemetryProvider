@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnrealBuildTool;
 using System.Web.Script.Serialization;
 
 namespace SimpleTelemetry
@@ -53,7 +54,7 @@ namespace SimpleTelemetry
         /// <summary>
         /// Request parameters
         /// </summary>
-        public List<Dictionary<string, string>> parameters  { get; set; }
+        public List<Dictionary<string, object>> parameters  { get; set; }
 
         /// <summary>
         /// Create a JSONRequest
@@ -65,12 +66,12 @@ namespace SimpleTelemetry
         {
             this.id = id;
             this.method = method;
-            this.parameters = new List<Dictionary<string,string>>();
+            this.parameters = new List<Dictionary<string, object>>();
 
             // event header
             if (eventName != null)
             {
-                Dictionary<string, string> header = new Dictionary<string, string>();
+                Dictionary<string, object> header = new Dictionary<string, object>();
                 header.Add("event", eventName);
                 if (commandLine != null)
                 {
@@ -82,10 +83,19 @@ namespace SimpleTelemetry
             // event params
             if (parameters != null)
             {
-                Dictionary<string, string> local_params = new Dictionary<string, string>();
+                Dictionary<string, object> local_params = new Dictionary<string, object>();
                 foreach (var item in parameters)
                 {
-                    local_params.Add(item.Item1, item.Item2);
+                    try
+                    {
+                        // Try to parse it to a float value
+                        float value = Convert.ToSingle(item.Item2);
+                        local_params.Add(item.Item1, Convert.ToSingle(item.Item2));
+                    }
+                    catch
+                    {
+                        local_params.Add(item.Item1, item.Item2);
+                    }
                 }
                 this.parameters.Add(local_params);
             }
