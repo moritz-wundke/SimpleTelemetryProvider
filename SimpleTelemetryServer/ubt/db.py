@@ -38,4 +38,30 @@ def insert_event(header, event):
         traceback.print_exc()
 
 def listing(**k):
-    return config.DB.events.find()
+    return config.DB.events.aggregate(
+        [
+            {
+                "$match": { "event" : "BuildStatsTotal.2" }
+            },
+            
+            {
+                "$group": {           
+                    "_id": {"command": "$cmd", "buildTime": "$data.TotalUBTWallClockTimeSec"}
+                }
+                
+            },
+            {
+                "$project": {
+                    "command": "$_id.command",
+                    "buildTime": "$_id.buildTime",            
+                    "_id": 0
+                }
+                    
+            },
+            {
+                "$sort": { 
+                    "command": 1
+                }
+            }
+        ]
+    )['result']
