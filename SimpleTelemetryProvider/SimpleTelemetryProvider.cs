@@ -79,7 +79,7 @@ namespace SimpleTelemetry
 
         public SimpleTelemetryProvider()
         {
-            if ( Utils.GetEnvironmentVariable("ue.UBT.bEnableTelemetryProvider", true) )
+            if (SimpleTelemetryProvider.bEnableTelemetryProvider)
             {
                 try 
                 {
@@ -116,7 +116,7 @@ namespace SimpleTelemetry
                         }
                     }
                 }
-                requests.Add(proxy.CreateRequest(MethodName, SessionID, EventName, CommandLine, Attributes));
+                requests.Add(proxy.CreateRequest(SimpleTelemetryProvider.MethodName, SessionID, EventName, CommandLine, Attributes));
             }
         }
 
