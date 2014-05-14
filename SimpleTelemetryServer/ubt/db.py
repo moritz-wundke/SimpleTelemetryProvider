@@ -31,6 +31,7 @@ def insert_event(header, event):
               "cmd": header["cmd"]
             , "event": header["event"]
             , "sessionid": header["sessionid"]
+            , "project": header["project"]
             , "created": datetime.datetime.now()
             , "data": event
         }

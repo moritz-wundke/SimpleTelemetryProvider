@@ -10,19 +10,14 @@ To use the provider just copy the folder containing the source (SimpleTelemetryP
 
 To debug the provider set the ```ue.UBT.bDebugRPCCalls``` environment variable to true, you will see the requests and responses to get printed to your build log.
 
-Once you have the folder setup you only have to change the URL and the method name (depending on your WebServer):
+Once you have the folder setup you only have to change the URL and the method name (depending on your WebServer) using the following environment variables:
 
-```C#
-class SimpleTelemetryProvider : Telemetry.IProvider
-{
-    [...]
-    
-    private string HostUrl = "http://<you/host/>:8080/api";
-    private static string MethodName = "UBT";
-    
-    [...]
-}
-```
+* ```ue.UBT.TelemetryProviderURL```
+* ```ue.UBT.TelemetryProviderMethodName```
+* ```ue.UBT.TelemetryProviderProjectName```
+
+Sample Backend
+----
 
 A simple JSON RPC 2.0 python server has been provided to be able to start getting your stats up and running as fast as possible. Just use the ```run.[bat|sh]``` to launch the server. The server will run by default on port 8080, check the launch script to specifiy a different port. 
 

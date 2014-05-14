@@ -68,11 +68,12 @@ namespace SimpleTelemetry
             this.method = method;
             this.parameters = new List<Dictionary<string, object>>();
 
-            // event header
+            // Event Header
             if (eventName != null)
             {
                 Dictionary<string, object> header = new Dictionary<string, object>();
                 header.Add("event", eventName);
+                header.Add("project", SimpleTelemetryProvider.ProjectName);
                 if (commandLine != null)
                 {
                     header.Add("cmd", commandLine);
@@ -82,9 +83,9 @@ namespace SimpleTelemetry
                     header.Add("sessionid", SessionID);
                 }
                 this.parameters.Add(header);
-            }
+            }        
 
-            // event params
+            // Event Data
             if (parameters != null)
             {
                 Dictionary<string, object> local_params = new Dictionary<string, object>();

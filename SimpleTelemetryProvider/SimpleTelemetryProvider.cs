@@ -38,16 +38,39 @@ namespace SimpleTelemetry
     class SimpleTelemetryProvider : Telemetry.IProvider
     {
         private JSONClient proxy;
-        private string HostUrl = "http://<you/host/>:8080/api";
-        private static string MethodName = "UBT";
+        private string CommandLine = null;
+        private string SessionID = null;
+
+        /// <summary>
+        /// URL of the telemetry backend
+        /// </summary>
+        public static string HostURL = Utils.GetEnvironmentVariable("ue.UBT.TelemetryProviderURL", "http://<you/host/>:8080/api");
+
+        /// <summary>
+        /// Method name of the JSON RPC backend
+        /// </summary>
+        public static string MethodName = Utils.GetEnvironmentVariable("ue.UBT.TelemetryProviderMethodName", "UBT");
+
+        /// <summary>
+        /// The Project name is used to be able to use a single backend for multiple projects
+        /// </summary>
+        public static string ProjectName = Utils.GetEnvironmentVariable("ue.UBT.TelemetryProviderProjectName", "MyProject");
+
+        /// <summary>
+        /// Enable UBT telemetry or not
+        /// </summary>
+        public static bool bEnableTelemetryProvider = Utils.GetEnvironmentVariable("ue.UBT.bEnableTelemetryProvider", true);
+
+        /// <summary>
+        /// Print RPC debug information into the log
+        /// </summary>
+        public static bool bDebugRPCCalls = Utils.GetEnvironmentVariable("ue.UBT.bDebugRPCCalls", false);
+
 
         /// <summary>
         /// List of requests we will send at the end
         /// </summary>
         public List<JSONRequest> requests = new List<JSONRequest>();
-
-        private string CommandLine = null;
-        private string SessionID = null;
 
         public class SessionResponse
         {
@@ -60,7 +83,7 @@ namespace SimpleTelemetry
             {
                 try 
                 {
-                    proxy = new JSONClient(HostUrl);
+                    proxy = new JSONClient(HostURL);
                     // Ping the server if it faild null the provider
                     var response = proxy.Exec(proxy.CreateRequest("request_id"));
                     SessionID = (new JavaScriptSerializer()).Deserialize<SessionResponse>(response).result;

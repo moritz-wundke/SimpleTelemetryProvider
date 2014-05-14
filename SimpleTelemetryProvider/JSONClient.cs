@@ -52,11 +52,6 @@ namespace SimpleTelemetry
         private readonly WebClient webClient;
 
         /// <summary>
-        /// Print RPC debug information into the log
-        /// </summary>
-        public static bool bDebugRPCCalls; 
-
-        /// <summary>
         /// Headers used for every request
         /// </summary>
         public WebHeaderCollection Headers { get { return this.webClient.Headers; } }
@@ -75,8 +70,7 @@ namespace SimpleTelemetry
         
         public JSONClient(string url)
         {
-            bDebugRPCCalls = Utils.GetEnvironmentVariable("ue.UBT.bDebugRPCCalls", false);
-            this.uri = new Uri(Utils.GetEnvironmentVariable("ue.UBT.TelemetryProviderURL", url));
+            this.uri = new Uri(url);
             this.webClient = new WebClient();
             this.webClient.Headers.Add("Content-Type", "application/json");
             this.webClient.UploadDataCompleted += OnUploadDataCompleted;
@@ -92,7 +86,7 @@ namespace SimpleTelemetry
             try
             {
                 string requestSerialized = request.ToJSON();
-                Log.WriteLineIf(bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, requestSerialized);
+                Log.WriteLineIf(SimpleTelemetryProvider.bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, requestSerialized);
                 byte[] requestBinary = Encoding.UTF8.GetBytes(requestSerialized);
                 byte[] resultBinary;
                 lock (this.webClient)
@@ -100,7 +94,7 @@ namespace SimpleTelemetry
                     resultBinary = this.webClient.UploadData(this.uri, "POST", requestBinary);
                 }
                 string responseSerialized = Encoding.UTF8.GetString(resultBinary);
-                Log.WriteLineIf(bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, responseSerialized);
+                Log.WriteLineIf(SimpleTelemetryProvider.bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, responseSerialized);
                 return responseSerialized;
             }
             catch (Exception Exception)
@@ -114,7 +108,7 @@ namespace SimpleTelemetry
         {
             try {
                 string requestSerialized = request.ToJSON();
-                Log.WriteLineIf(bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, requestSerialized);
+                Log.WriteLineIf(SimpleTelemetryProvider.bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, requestSerialized);
                 byte[] requestBinary = Encoding.UTF8.GetBytes(requestSerialized);
                 lock (webClient)
                 {
@@ -152,7 +146,7 @@ namespace SimpleTelemetry
                 int id = (int)uploadDataCompletedEventArgs.UserState;
                 byte[] responseBinary = uploadDataCompletedEventArgs.Result;
                 string responseSerialized = Encoding.UTF8.GetString(responseBinary);
-                Log.WriteLineIf(bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, responseSerialized);
+                Log.WriteLineIf(SimpleTelemetryProvider.bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, responseSerialized);
 
                 // fire event.
                 if (AsyncCompleted != null)
