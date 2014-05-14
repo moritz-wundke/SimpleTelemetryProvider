@@ -76,7 +76,7 @@ namespace SimpleTelemetry
         public JSONClient(string url)
         {
             bDebugRPCCalls = Utils.GetEnvironmentVariable("ue.UBT.bDebugRPCCalls", false);
-            this.uri = new Uri(url);
+            this.uri = new Uri(Utils.GetEnvironmentVariable("ue.UBT.TelemetryProviderURL", url));
             this.webClient = new WebClient();
             this.webClient.Headers.Add("Content-Type", "application/json");
             this.webClient.UploadDataCompleted += OnUploadDataCompleted;

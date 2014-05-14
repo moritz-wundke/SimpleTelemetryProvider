@@ -56,20 +56,22 @@ namespace SimpleTelemetry
 
         public SimpleTelemetryProvider()
         {
-            try 
+            if ( Utils.GetEnvironmentVariable("ue.UBT.bEnableTelemetryProvider", true) )
             {
-                proxy = new JSONClient(HostUrl);
-                // Ping the server if it faild null the provider
-                var response = proxy.Exec(proxy.CreateRequest("request_id"));
-                SessionID = (new JavaScriptSerializer()).Deserialize<SessionResponse>(response).result;
-            }
-            catch (Exception Exception)
-            {
-                Log.TraceError("SimpleTelemetryProvider Exception: " + Exception);
-                proxy = null;
-                SessionID = null;
-            }
-            
+                try 
+                {
+                    proxy = new JSONClient(HostUrl);
+                    // Ping the server if it faild null the provider
+                    var response = proxy.Exec(proxy.CreateRequest("request_id"));
+                    SessionID = (new JavaScriptSerializer()).Deserialize<SessionResponse>(response).result;
+                }
+                catch (Exception Exception)
+                {
+                    Log.TraceError("SimpleTelemetryProvider Exception: " + Exception);
+                    proxy = null;
+                    SessionID = null;
+                }
+            }            
         }
 
         public void SendEvent(string EventName, IEnumerable<Tuple<string, string>> Attributes)
