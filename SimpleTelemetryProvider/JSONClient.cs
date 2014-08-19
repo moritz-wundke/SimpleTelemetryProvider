@@ -129,9 +129,9 @@ namespace SimpleTelemetry
         /// <param name="method"></param>
         /// <param name="methodParams"></param>
         /// <returns></returns>
-        public JSONRequest CreateRequest(string method, string SessionID = null, string eventName = null, string commandLine = null, IEnumerable<Tuple<string, string>> parameters = null)
+        public JSONRequest CreateRequest(string method, string SessionID = null)
         {
-            return new JSONRequest(Interlocked.Increment(ref currentId), method, SessionID, eventName, commandLine, parameters);
+            return new JSONRequest(Interlocked.Increment(ref currentId), method, SessionID);
         }
 
         /// <summary>
@@ -150,7 +150,9 @@ namespace SimpleTelemetry
 
                 // fire event.
                 if (AsyncCompleted != null)
+                {
                     AsyncCompleted(id, responseSerialized); // TODO: Add response
+                }
             }
             catch (Exception Exception)
             {

@@ -38,7 +38,6 @@ namespace SimpleTelemetry
     class SimpleTelemetryProvider : Telemetry.IProvider
     {
         private JSONClient proxy;
-        private string CommandLine = null;
         private string SessionID = null;
 
         /// <summary>
@@ -70,7 +69,7 @@ namespace SimpleTelemetry
         /// <summary>
         /// List of requests we will send at the end
         /// </summary>
-        public List<JSONRequest> requests = new List<JSONRequest>();
+        public JSONRequest request;
 
         public class SessionResponse
         {
@@ -87,6 +86,9 @@ namespace SimpleTelemetry
                     // Ping the server if it faild null the provider
                     var response = proxy.Exec(proxy.CreateRequest("request_id"));
                     SessionID = (new JavaScriptSerializer()).Deserialize<SessionResponse>(response).result;
+
+                    // Create the request
+                    request = proxy.CreateRequest(SimpleTelemetryProvider.MethodName, SessionID);
                 }
                 catch (Exception Exception)
                 {
@@ -101,22 +103,15 @@ namespace SimpleTelemetry
         {
             if (proxy != null)
             {
-                // Search for the cmd atribute we use in the header
-                
-                if (CommandLine == null && Attributes != null && EventName.Contains("CommonAttributes"))
+                // Add the new request
+                try
                 {
-                    foreach (var item in Attributes)
-                    {
-                        if (String.Compare("CommandLine", item.Item1) == 0)
-                        {
-                            CommandLine = item.Item2;
-                            // We better do not split, this way we get builds, rebuilds, etc
-                            //CommandLine = item.Item2.Split(' ')[0];
-                            break;
-                        }
-                    }
+                    request.AddEvent(EventName, Attributes);
                 }
-                requests.Add(proxy.CreateRequest(SimpleTelemetryProvider.MethodName, SessionID, EventName, CommandLine, Attributes));
+                catch (Exception Exception)
+                {
+                    Log.TraceError("SimpleTelemetryProvider Exception: " + Exception);
+                }
             }
         }
 
@@ -124,11 +119,8 @@ namespace SimpleTelemetry
         {
             if (proxy != null)
             {
-                // Submit all events
-                foreach (JSONRequest request in requests)
-                {
-                    proxy.Exec(request);
-                }
+                // Submit event
+                proxy.Exec(request);
 
                 // Dispose proxy
                 proxy.Dispose();

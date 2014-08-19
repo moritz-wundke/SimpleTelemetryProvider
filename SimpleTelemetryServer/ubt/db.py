@@ -25,16 +25,28 @@ import config
 import traceback
 import datetime
 
-def insert_event(header, event):
+def stats_list_to_dict(stats_list):
+    stats_dict = {}
+    for stats in stats_list:
+        try:
+            stats_dict[stats["Item1"]] = float(stats["Item2"].replace(',','.'))
+        except:
+            stats_dict[stats["Item1"]] = stats["Item2"]
+    return stats_dict
+
+def insert_event(data):
     try:
-        event = {
-              "cmd": header["cmd"]
-            , "event": header["event"]
-            , "sessionid": header["sessionid"]
-            , "project": header["project"]
-            , "created": datetime.datetime.now()
-            , "data": event
-        }
+        event = {}
+        event["sessionid"] = data["sessionid"]
+
+        # Add all stats
+        event["BuildStatsTotal"] = stats_list_to_dict(data["BuildStatsTotal.2"])
+        event["LoadIncludeDependencyCacheStats"] = stats_list_to_dict(data["LoadIncludeDependencyCacheStats.2"])
+        event["PerformanceInfo"] = stats_list_to_dict(data["PerformanceInfo.2"])
+        event["CommonAttributes"] = stats_list_to_dict(data["CommonAttributes.2"])
+        event["TargetBuildStats"] = stats_list_to_dict(data["TargetBuildStats.2"])
+
+        # Add to DB
         config.DB.events.insert(event)
     except:
         traceback.print_exc()

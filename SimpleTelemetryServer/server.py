@@ -59,9 +59,9 @@ def request_id(request):
 def ping(request):
     return "pong"
 
-@jsonremote(api_service, doc='ping server')
-def UBT(request, header, event):
-    ubt.db.insert_event(header, event)
+@jsonremote(api_service, doc='Add UBT event')
+def UBT(request, data):
+    ubt.db.insert_event(data)
     return "ok"
 
 if __name__ == "__main__":

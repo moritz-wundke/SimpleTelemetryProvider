@@ -3,7 +3,16 @@ $def with (page, title=None)
 <title>UBT Stats Example\
 $if title: : $title\
 </title>
-</head><body>
+<style>
+table,th,td
+{
+    border:1px solid black;
+    border-collapse:collapse;
+}
+</style>
+</head>
+<body>
 <h1><a href="/">UBT Stats Example</a></h1>
 $:page   
-</body></html>
+</body>
+</html>

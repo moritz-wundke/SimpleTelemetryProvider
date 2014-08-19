@@ -54,7 +54,7 @@ namespace SimpleTelemetry
         /// <summary>
         /// Request parameters
         /// </summary>
-        public List<Dictionary<string, object>> parameters  { get; set; }
+        public List<object> parameters  { get; set; }
 
         /// <summary>
         /// Create a JSONRequest
@@ -62,47 +62,33 @@ namespace SimpleTelemetry
         /// <param name="id"></param>
         /// <param name="method"></param>
         /// <param name="methodParams"></param>
-        public JSONRequest(int id, string method, string SessionID = null, string eventName=null, string commandLine=null, IEnumerable<Tuple<string, string>> parameters=null)
+        public JSONRequest(int id, string method, string SessionID = null)
         {
             this.id = id;
             this.method = method;
-            this.parameters = new List<Dictionary<string, object>>();
-
-            // Event Header
-            if (eventName != null)
+            this.parameters = new List<object>();
+            if (SessionID != null)
             {
-                Dictionary<string, object> header = new Dictionary<string, object>();
-                header.Add("event", eventName);
-                header.Add("project", SimpleTelemetryProvider.ProjectName);
-                if (commandLine != null)
-                {
-                    header.Add("cmd", commandLine);
-                }
-                if (SessionID != null)
-                {
-                    header.Add("sessionid", SessionID);
-                }
-                this.parameters.Add(header);
-            }        
+                this.parameters.Add(new Dictionary<string, object>());
+                ((Dictionary<string, object>)this.parameters[0]).Add("sessionid", SessionID);
+            }
+        }
 
-            // Event Data
-            if (parameters != null)
+        private bool AddParam(string ParamName, object Param)
+        {
+            if (!((Dictionary<string, object>)this.parameters[0]).ContainsKey(ParamName))
             {
-                Dictionary<string, object> local_params = new Dictionary<string, object>();
-                foreach (var item in parameters)
-                {
-                    try
-                    {
-                        // Try to parse it to a float value
-                        float value = Convert.ToSingle(item.Item2);
-                        local_params.Add(item.Item1, Convert.ToSingle(item.Item2));
-                    }
-                    catch
-                    {
-                        local_params.Add(item.Item1, item.Item2);
-                    }
-                }
-                this.parameters.Add(local_params);
+                ((Dictionary<string, object>)this.parameters[0]).Add(ParamName, Param);
+                return true;
+            }
+            return false;
+        }
+
+        public void AddEvent(string EventName, object EventData)
+        {
+            if (!AddParam(EventName, EventData))
+            {
+                Log.WriteLineIf(SimpleTelemetryProvider.bDebugRPCCalls, System.Diagnostics.TraceEventType.Information, String.Format("{0} event already added!",EventName));
             }
         }
 

@@ -1,4 +1,13 @@
 $def with (items)
-
+<table>
+<tr>
+  <th>User</th>
+  <th>Build Time</th> 
+  <th>CPU Count</th>
+  <th>Configuration</th>
+  <th>Platform</th>
+  <th>Executor</th>
+</tr>
 $for item in items:
     $:render.item(item)
+</table>
