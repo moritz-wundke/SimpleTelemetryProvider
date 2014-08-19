@@ -40,11 +40,16 @@ def insert_event(data):
         event["sessionid"] = data["sessionid"]
 
         # Add all stats
-        event["BuildStatsTotal"] = stats_list_to_dict(data["BuildStatsTotal.2"])
-        event["LoadIncludeDependencyCacheStats"] = stats_list_to_dict(data["LoadIncludeDependencyCacheStats.2"])
-        event["PerformanceInfo"] = stats_list_to_dict(data["PerformanceInfo.2"])
-        event["CommonAttributes"] = stats_list_to_dict(data["CommonAttributes.2"])
-        event["TargetBuildStats"] = stats_list_to_dict(data["TargetBuildStats.2"])
+        if "BuildStatsTotal.2" in data:
+            event["BuildStatsTotal"] = stats_list_to_dict(data["BuildStatsTotal.2"])
+        if "LoadIncludeDependencyCacheStats.2" in data:
+            event["LoadIncludeDependencyCacheStats"] = stats_list_to_dict(data["LoadIncludeDependencyCacheStats.2"])
+        if "PerformanceInfo.2" in data:
+            event["PerformanceInfo"] = stats_list_to_dict(data["PerformanceInfo.2"])
+        if "CommonAttributes.2" in data:
+            event["CommonAttributes"] = stats_list_to_dict(data["CommonAttributes.2"])
+        if "TargetBuildStats.2" in data:
+            event["TargetBuildStats"] = stats_list_to_dict(data["TargetBuildStats.2"])
 
         # Add to DB
         config.DB.events.insert(event)
@@ -55,26 +60,39 @@ def listing(**k):
     return config.DB.events.aggregate(
         [
             {
-                "$match": { "event" : "BuildStatsTotal.2" }
+                "$match": { "TargetBuildStats.AppName" : "UE4Editor", "TargetBuildStats.CleanTarget" : "False"  }
             },
             
             {
                 "$group": {           
-                    "_id": {"command": "$cmd", "buildTime": "$data.TotalUBTWallClockTimeSec"}
+                    "_id": {
+                        "ExecutorName": "$BuildStatsTotal.ExecutorName", 
+                        "TotalUBTWallClockTimeSec": "$BuildStatsTotal.TotalUBTWallClockTimeSec",
+                        "ProcessorCount": "$CommonAttributes.ProcessorCount",
+                        "ComputerName": "$CommonAttributes.ComputerName",
+                        "User": "$CommonAttributes.User",
+                        "Configuration": "$CommonAttributes.Configuration",
+                        "Platform": "$CommonAttributes.Platform"
+                    }
                 }
                 
             },
             {
                 "$project": {
-                    "command": "$_id.command",
-                    "buildTime": "$_id.buildTime",            
+                    "ExecutorName": "$_id.ExecutorName",
+                    "TotalUBTWallClockTimeSec": "$_id.TotalUBTWallClockTimeSec",
+                    "ProcessorCount": "$_id.ProcessorCount",
+                    "ComputerName": "$_id.ComputerName",
+                    "User": "$_id.User",
+                    "Configuration": "$_id.Configuration",
+                    "Platform": "$_id.Platform",                    
                     "_id": 0
                 }
                     
             },
             {
                 "$sort": { 
-                    "command": 1
+                    "totaltime": 1
                 }
             }
         ]
