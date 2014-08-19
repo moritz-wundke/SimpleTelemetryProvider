@@ -60,7 +60,11 @@ def listing(**k):
     return config.DB.events.aggregate(
         [
             {
-                "$match": { "TargetBuildStats.AppName" : "UE4Editor", "TargetBuildStats.CleanTarget" : "False"  }
+                "$match": { 
+                    "TargetBuildStats.AppName" : "UE4Editor", 
+                    "TargetBuildStats.CleanTarget" : "False",
+                    "BuildStatsTotal.ExecutorName" : { "$ne": "NoActionsToExecute" }
+                }
             },
             
             {
@@ -77,6 +81,7 @@ def listing(**k):
                 }
                 
             },
+            
             {
                 "$project": {
                     "ExecutorName": "$_id.ExecutorName",
@@ -92,7 +97,7 @@ def listing(**k):
             },
             {
                 "$sort": { 
-                    "totaltime": 1
+                    "TotalUBTWallClockTimeSec": 1
                 }
             }
         ]
